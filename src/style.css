@@ -1,0 +1,359 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Comic book style header */
+header h1 {
+  font-family: 'Bangers', cursive;
+  font-size: 3.5rem;
+  margin-bottom: 0.5rem;
+  color: #FE111A; /* Kirby red */
+  text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+  letter-spacing: 2px;
+  transform: skew(-5deg); /* Slight skew for dynamic effect */
+}
+
+header p {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #3062D6; /* Kirby blue */
+  background-color: #FFEB3B; /* Yellow background */
+  display: inline-block;
+  padding: 3px 15px;
+  border: 2px solid black;
+  border-radius: 2px;
+  transform: rotate(-1deg); /* Slight rotation for dynamic effect */
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.8);
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 5; /* Ensure controls are above map and its decorations */
+}
+
+.search, .filter {
+  flex: 1;
+}
+
+.search {
+  margin-right: 1rem;
+}
+
+/* Comic book style inputs */
+input, select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 3px solid #000;
+  font-size: 1rem;
+  height: 45px; /* Fixed height for both inputs and select */
+  box-sizing: border-box;
+  background-color: #FFEB3B; /* Yellow background */
+  font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+  font-weight: bold;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.8);
+  border-radius: 1px;
+}
+
+.map-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 1.5rem;
+  padding: 5px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Comic panel frame effect */
+.map-container:before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  border: 2px solid #000;
+  z-index: -1;
+  background-color: #FE111A; /* Kirby red */
+}
+
+/* Kirby-style corner 'POW!' */
+.map-container:after {
+  content: 'POW!';
+  position: absolute;
+  top: -25px;
+  right: -25px;
+  background-color: #FFEB3B;
+  color: #FE111A;
+  padding: 5px 15px;
+  border: 3px solid black;
+  border-radius: 50%;
+  font-family: 'Bangers', cursive;
+  font-size: 20px;
+  transform: rotate(15deg);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.8);
+  text-shadow: 1px 1px 0 black;
+  z-index: 1;
+}
+
+#map {
+  width: 100%;
+  height: 70vh; /* Use viewport height for better scaling */
+  min-height: 450px;
+  border: 5px solid black;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.5);
+  z-index: 0;
+}
+
+/* Kirby-inspired comic book marker */
+.marker {
+  background-color: #FE111A; /* Bold red like in Kirby's work */
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  box-shadow: 0 0 0 rgba(254, 17, 26, 0.4);
+  animation: kirby-pulse 2s infinite;
+  border: 4px solid black; /* Thick black outline like comic panels */
+  transition: transform 0.2s ease;
+  border-radius: 50%;
+  display: block;
+}
+
+/* Add Kirby dots/energy effect on hover */
+.marker:hover {
+  transform: scale(1.3);
+  z-index: 10;
+  background-color: #FE111A;
+  box-shadow: 0 0 0 4px rgba(254, 17, 26, 0.3), 
+              0 0 0 8px rgba(254, 17, 26, 0.2),
+              0 0 0 12px rgba(254, 17, 26, 0.1);
+}
+
+/* Create a pulsing effect like Kirby's energy dots */
+@keyframes kirby-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(254, 17, 26, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(254, 17, 26, 0),
+                0 0 0 12px rgba(254, 17, 26, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(254, 17, 26, 0);
+  }
+}
+
+/* Comic book style details panel */
+#store-details {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 2rem;
+  border: 4px solid black;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  max-width: 500px;
+  width: 90%;
+  background-color: #FFEB3B; /* Yellow background */
+  background-image: 
+    radial-gradient(#FFA726 2px, transparent 2px),
+    radial-gradient(#FFA726 2px, transparent 2px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px; /* Halftone effect like comic prints */
+}
+
+#store-details.hidden {
+  display: none;
+}
+
+#close-details {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: #FE111A; /* Kirby red */
+  border: 3px solid black;
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-family: 'Bangers', cursive;
+  cursor: pointer;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+}
+
+#store-name {
+  margin-bottom: 1rem;
+  color: #000;
+  font-size: 2rem;
+  font-family: 'Bangers', cursive;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 0 #FFF;
+  line-height: 1.1;
+}
+
+#store-info p {
+  margin-bottom: 0.8rem;
+  color: #000;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+  font-weight: bold;
+  font-size: 1.1rem;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 5px 10px;
+  border: 1px solid #000;
+}
+
+#store-website, #store-maps {
+  display: inline-block;
+  color: #FFF;
+  background-color: #3062D6; /* Kirby blue */
+  padding: 5px 10px;
+  border: 2px solid black;
+  font-family: 'Bangers', cursive;
+  text-decoration: none;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.8);
+  letter-spacing: 1px;
+  margin-top: 5px;
+}
+
+#store-website:hover, #store-maps:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.8);
+  transition: all 0.2s ease;
+}
+
+/* Comic book style popups */
+.mapboxgl-popup {
+  max-width: 300px;
+  z-index: 5;
+}
+
+.mapboxgl-popup-content {
+  text-align: center;
+  padding: 15px;
+  max-width: 300px;
+  background-color: #FFEB3B; /* Yellow background like comic speech bubbles */
+  border: 3px solid black; /* Thick black border like comic panels */
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.8); /* Offset shadow for comic effect */
+  border-radius: 2px; /* More angular like comic panels */
+}
+
+/* Comic book style heading */
+.mapboxgl-popup-content h3 {
+  margin-top: 0;
+  color: #000000;
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-family: "Bangers", "Impact", "Arial Black", sans-serif;
+  letter-spacing: 0.05em;
+}
+
+/* Comic book style popup tip */
+.mapboxgl-popup-tip {
+  border-top-color: black !important;
+  border-width: 12px !important;
+}
+
+.store-description {
+  font-size: 0.9rem;
+  font-style: normal;
+  color: #000;
+  margin-top: 8px;
+  text-align: left;
+  max-height: 100px;
+  overflow-y: auto;
+  font-family: "Comic Sans MS", "Chalkboard SE", sans-serif; /* Comic-style font */
+  line-height: 1.4;
+  background-color: rgba(255, 255, 255, 0.3); /* Subtle white background */
+  padding: 5px;
+  border-radius: 3px;
+}
+
+.map-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.map-error h3 {
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.map-error p {
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+  }
+  
+  .search {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+  
+  header {
+    margin-bottom: 1rem;
+  }
+  
+  header h1 {
+    font-size: 1.8rem;
+  }
+  
+  header p {
+    font-size: 1rem;
+  }
+}
