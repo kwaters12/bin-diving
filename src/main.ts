@@ -26,17 +26,35 @@ let markers: { element: HTMLElement, store: ComicStore }[] = [];
 // Initialize the map
 function initMap() {
   try {
+    // Check if WebGL is available
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    
+    if (!gl) {
+      throw new Error('WebGL is not supported by your browser. Please try a different browser or check your graphics settings.');
+    }
+    
     // Create a comic book style map centered on the US
     map = new mapboxgl.Map({
       container: 'map',
       // Use a light style as our base, which we'll transform into a comic book style
       style: 'mapbox://styles/mapbox/light-v11',
       center: [-98.5795, 39.8283], // Center of the US
-      zoom: 3
+      zoom: 3,
+      preserveDrawingBuffer: true, // Helps with some rendering issues
+      antialias: true // Smoother lines
     });
     
-    // We'll apply comic book styling in the main load event below
-
+    // Force map to fill container
+    const resizeMap = () => {
+      if (map) {
+        setTimeout(() => map.resize(), 0);
+      }
+    };
+    
+    // Listen for any size changes
+    window.addEventListener('resize', resizeMap);
+    
     // Add navigation controls
     map.addControl(new mapboxgl.NavigationControl());
 
@@ -355,4 +373,28 @@ stateFilter.addEventListener('change', loadStoreMarkers);
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
   initMap();
+  
+  // Add fallback for WebGL issues in some browsers
+  if (mapElement) {
+    const tryFallbackMapbox = () => {
+      try {
+        if (!map || !map.loaded()) {
+          console.log('Trying fallback map initialization...');
+          mapboxgl.clearStorage();
+          
+          // Try to force redraw
+          setTimeout(() => {
+            if (!map || !map.loaded()) {
+              initMap();
+            }
+          }, 1000);
+        }
+      } catch (e) {
+        console.error('Fallback map initialization failed:', e);
+      }
+    };
+    
+    // Add a fallback timeout
+    setTimeout(tryFallbackMapbox, 2000);
+  }
 });
