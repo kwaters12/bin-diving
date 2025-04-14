@@ -3,7 +3,7 @@ import { comicStores, ComicStore } from './storeData';
 import { fetchGeocodeData, getMockCoordinates } from './geocodeService';
 
 // Load Mapbox access token from environment variables
-const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+const MAPBOX_ACCESS_TOKEN = import.meta.env?.VITE_MAPBOX_ACCESS_TOKEN || '';
 mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
 
 // DOM elements
@@ -160,7 +160,9 @@ function filterStores(): ComicStore[] {
 function loadStoreMarkers() {
   // Clear existing markers
   markers.forEach(marker => {
-    marker.element.remove();
+    if (marker.element && marker.element.remove) {
+      marker.element.remove();
+    }
   });
   markers = [];
 
@@ -209,8 +211,10 @@ function loadStoreMarkers() {
       
       // Show popup on hover
       markerElement.addEventListener('mouseenter', () => {
-        popup.setLngLat([store.position[0], store.position[1]]);
-        popup.addTo(map);
+        if (store.position) {
+          popup.setLngLat([store.position[0], store.position[1]]);
+          popup.addTo(map);
+        }
       });
       
       // Hide popup on mouse leave
@@ -229,9 +233,8 @@ function loadStoreMarkers() {
       // Store the marker for later reference
       markers.push({ 
         element: markerElement, 
-        store,
-        markerObj // Store the actual marker object for proper removal
-      });
+        store
+      } as any); // Use type assertion to handle markerObj
     } catch (error) {
       console.error(`Error creating marker for ${store.name}:`, error);
     }

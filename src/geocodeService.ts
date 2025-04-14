@@ -32,7 +32,7 @@ export async function fetchGeocodeData(address: string): Promise<[number, number
 
 // For development/testing purposes, we can add some mock coordinates for a few stores
 // In a real app, these would be fetched from the geocoding API
-export function getMockCoordinates(storeName: string, state: string): [number, number] | null {
+export function getMockCoordinates(storeName: string, _state: string): [number, number] | null {
   const mockData: Record<string, [number, number]> = {
     // Canada
     "The Beguiling": [-79.4024, 43.6568], // Toronto, ON
