@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/bin-diving/',
+  base: '/',
   server: {
     port: 3000
   },

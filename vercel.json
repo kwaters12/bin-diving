@@ -1,7 +1,4 @@
 {
-  "rewrites": [
-    { "source": "/bin-diving/:path*", "destination": "/:path*" }
-  ],
   "cleanUrls": true,
   "trailingSlash": false
 }
