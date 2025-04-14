@@ -47,7 +47,7 @@ header h1 {
 }
 
 header p {
-  font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+  font-family: 'Noto Sans', sans-serif;
   font-size: 1.3rem;
   font-weight: bold;
   color: #3062D6; /* Kirby blue */
@@ -85,7 +85,7 @@ input, select {
   height: 45px; /* Fixed height for both inputs and select */
   box-sizing: border-box;
   background-color: #FFEB3B; /* Yellow background */
-  font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+  font-family: 'Noto Sans', sans-serif;
   font-weight: bold;
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.8);
   border-radius: 1px;
@@ -223,6 +223,7 @@ input, select {
   align-items: center;
   justify-content: center;
   box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+  text-shadow: 1px 1px 0 #000;
 }
 
 #store-name {
@@ -239,7 +240,7 @@ input, select {
 #store-info p {
   margin-bottom: 0.8rem;
   color: #000;
-  font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+  font-family: 'Noto Sans', sans-serif;
   font-weight: bold;
   font-size: 1.1rem;
   background-color: rgba(255, 255, 255, 0.7);
@@ -258,6 +259,7 @@ input, select {
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.8);
   letter-spacing: 1px;
   margin-top: 5px;
+  text-shadow: 1px 1px 0 #000;
 }
 
 #store-website:hover, #store-maps:hover {
@@ -291,6 +293,10 @@ input, select {
   text-transform: uppercase;
   font-family: "Bangers", "Impact", "Arial Black", sans-serif;
   letter-spacing: 0.05em;
+  text-shadow: 1px 1px 0 white;
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 3px;
+  border-radius: 2px;
 }
 
 /* Comic book style popup tip */
@@ -307,9 +313,9 @@ input, select {
   text-align: left;
   max-height: 100px;
   overflow-y: auto;
-  font-family: "Comic Sans MS", "Chalkboard SE", sans-serif; /* Comic-style font */
+  font-family: "Noto Sans", sans-serif;
   line-height: 1.4;
-  background-color: rgba(255, 255, 255, 0.3); /* Subtle white background */
+  background-color: rgba(255, 255, 255, 0.5); /* More visible white background */
   padding: 5px;
   border-radius: 3px;
 }
