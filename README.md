@@ -1,13 +1,13 @@
 # Comic Store Map
 
-An interactive map of comic book stores with "bin diving" opportunities, based on Michel Fiffe's list.
+An interactive global map of comic book stores with "bin diving" opportunities. North American stores are primarily sourced from Michel Fiffe's Bin Diving Megalist, with curated additions from the UK, Europe, Australia, New Zealand, Japan, and Latin America.
 
 ## Features
 
-- Interactive map showing comic store locations across the United States
-- Filter stores by state
-- Search for specific stores by name
-- Click on markers to view store details
+- Interactive map showing comic store locations worldwide
+- Filter stores by region (US states, Canadian provinces, countries)
+- Search for stores by name, city, or country
+- Click on markers to view store details including descriptions and links
 - Responsive design works on mobile and desktop
 
 ## Prerequisites
@@ -24,10 +24,12 @@ An interactive map of comic book stores with "bin diving" opportunities, based o
    npm install
    ```
 3. Create a Mapbox account at https://account.mapbox.com/auth/signup/ and get an access token
-4. Open `src/main.ts` and replace `YOUR_MAPBOX_ACCESS_TOKEN` with your actual token:
-   ```typescript
-   const MAPBOX_ACCESS_TOKEN = 'your_actual_token_here';
+4. Copy `.env.example` to `.env` and add your Mapbox access token:
+   ```bash
+   cp .env.example .env
+   # Then edit .env and replace the placeholder with your actual token
    ```
+   The app reads `VITE_MAPBOX_ACCESS_TOKEN` from environment variables.
 
 ## Development
 
@@ -58,20 +60,29 @@ To add more stores or update store information, edit the `storeData.ts` file. Ea
 ```typescript
 {
   name: "Store Name",
-  state: "State Name",
+  country: "Country Name", // required (e.g., "USA", "United Kingdom", "Japan")
+  state: "State/Province", // optional - US state, Canadian province, or regional identifier
   url: "https://store-website.com", // optional
   address: "123 Main St", // optional
   city: "City Name", // optional
   phone: "(555) 123-4567", // optional
-  position: [-73.9871, 40.7552] // [longitude, latitude] - optional
+  position: [-73.9871, 40.7552], // [longitude, latitude] - optional but recommended
+  description: "Store description" // optional - notes about bin diving opportunities
 }
 ```
 
 If a store doesn't have position data, but does have an address, the application will attempt to geocode it when a valid Mapbox token is provided.
 
-## Data Source
+## Data Sources
 
-The list of comic stores is based on Michel Fiffe's "Bin Diving Megalist": https://michelfiffe.com/?page_id=9802
+- **North America**: Based on Michel Fiffe's "Bin Diving Megalist": https://michelfiffe.com/?page_id=9802
+- **International**: Curated from community recommendations and research covering:
+  - UK & Ireland (London, Manchester, Birmingham, Glasgow, Edinburgh, Dublin)
+  - Europe (France, Germany, Netherlands, Belgium, Spain, Italy)
+  - Australia (Melbourne, Sydney)
+  - New Zealand (Auckland, Hamilton)
+  - Japan (Tokyo, Osaka - Mandarake chain)
+  - Latin America (Argentina, Mexico, Brazil)
 
 ## License
 

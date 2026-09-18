@@ -1,5 +1,5 @@
 import mapboxgl from 'mapbox-gl';
-import { comicStores, ComicStore } from './storeData';
+import { comicStores, ComicStore, getUniqueRegions } from './storeData';
 import { fetchGeocodeData, getMockCoordinates } from './geocodeService';
 
 // Load Mapbox access token from environment variables
@@ -34,13 +34,13 @@ function initMap() {
       throw new Error('WebGL is not supported by your browser. Please try a different browser or check your graphics settings.');
     }
     
-    // Create a comic book style map centered on the US
+    // Create a comic book style map with global view
     map = new mapboxgl.Map({
       container: 'map',
       // Use a light style as our base, which we'll transform into a comic book style
       style: 'mapbox://styles/mapbox/light-v11',
-      center: [-98.5795, 39.8283], // Center of the US
-      zoom: 3,
+      center: [-20, 30], // Atlantic-centered view showing Americas, Europe, and parts of Asia/Africa
+      zoom: 1.5,
       preserveDrawingBuffer: true, // Helps with some rendering issues
       antialias: true // Smoother lines
     });
@@ -87,19 +87,24 @@ function initMap() {
   }
 }
 
-// Populate the state filter dropdown
+// Populate the region filter dropdown
 function populateStateFilter() {
-  const states = [...new Set(comicStores.map(store => store.state))].sort();
+  const regions = getUniqueRegions();
   
-  // Clear existing options except the "All States" default option
+  // Clear existing options except the "All Regions" default option
   while (stateFilter.options.length > 1) {
     stateFilter.remove(1);
   }
   
-  states.forEach(state => {
+  // Update the default option text
+  if (stateFilter.options[0]) {
+    stateFilter.options[0].textContent = 'All Regions';
+  }
+  
+  regions.forEach(region => {
     const option = document.createElement('option');
-    option.value = state;
-    option.textContent = state;
+    option.value = region;
+    option.textContent = region;
     stateFilter.appendChild(option);
   });
 }
@@ -109,7 +114,7 @@ async function addGeocodeDataToStores() {
   const geocodingPromises = comicStores.map(async store => {
     // Try to get mock coordinates first (even if store already has position)
     // This ensures we use our carefully chosen mock coordinates
-    const mockCoords = getMockCoordinates(store.name, store.state);
+    const mockCoords = getMockCoordinates(store.name, store.state || store.country);
     if (mockCoords) {
       store.position = mockCoords;
       return;
@@ -117,15 +122,13 @@ async function addGeocodeDataToStores() {
     
     // If no mock coordinates and no existing position, try to geocode the address
     if (!store.position) {
-      let addressToGeocode = '';
+      const geocodeParts: string[] = [];
+      if (store.address) geocodeParts.push(store.address);
+      if (store.city) geocodeParts.push(store.city);
+      if (store.state) geocodeParts.push(store.state);
+      geocodeParts.push(store.country);
       
-      if (store.address && store.city) {
-        addressToGeocode = `${store.address}, ${store.city}, ${store.state}`;
-      } else if (store.city) {
-        addressToGeocode = `${store.city}, ${store.state}`;
-      } else {
-        addressToGeocode = `${store.name}, ${store.state}`;
-      }
+      const addressToGeocode = geocodeParts.join(', ');
       
       try {
         const coords = await fetchGeocodeData(addressToGeocode);
@@ -134,19 +137,47 @@ async function addGeocodeDataToStores() {
           // Add a small delay to avoid rate limiting
           await new Promise(resolve => setTimeout(resolve, 200));
         } else {
-          // Fallback position if geocoding fails (centered in the state or country)
-          if (store.state === "California") store.position = [-119.4179, 36.7783];
-          else if (store.state === "New York") store.position = [-75.9880, 42.8280];
-          else if (store.state === "Ontario") store.position = [-79.3832, 43.6532];
-          else if (store.state.includes("Columbia")) store.position = [-123.1207, 49.2827];
-          else if (store.state === "Alberta") store.position = [-115.0008, 54.5000];
-          else if (store.state === "New Jersey") store.position = [-74.5089, 40.0583];
-          else store.position = [-98.5795, 39.8283]; // Center of the US
+          // Fallback positions by country/region
+          const fallbacks: Record<string, [number, number]> = {
+            "California": [-119.4179, 36.7783],
+            "New York": [-75.9880, 42.8280],
+            "Ontario": [-79.3832, 43.6532],
+            "British Columbia": [-123.1207, 49.2827],
+            "Alberta": [-115.0008, 54.5000],
+            "New Jersey": [-74.5089, 40.0583],
+            "USA": [-98.5795, 39.8283],
+            "Canada": [-106.3468, 56.1304],
+            "United Kingdom": [-1.1743, 52.3555],
+            "Ireland": [-7.6921, 53.1424],
+            "France": [2.3522, 46.6034],
+            "Germany": [10.4515, 51.1657],
+            "Netherlands": [5.2913, 52.1326],
+            "Belgium": [4.4699, 50.5039],
+            "Spain": [-3.7038, 40.4168],
+            "Italy": [12.5674, 41.8719],
+            "Australia": [133.7751, -25.2744],
+            "New Zealand": [174.8860, -40.9006],
+            "Japan": [138.2529, 36.2048],
+            "Argentina": [-63.6167, -38.4161],
+            "Mexico": [-102.5528, 23.6345],
+            "Brazil": [-51.9253, -14.2350]
+          };
+          
+          store.position = fallbacks[store.state || ''] || 
+                          fallbacks[store.country] || 
+                          [0, 20]; // World center fallback
         }
       } catch (error) {
         console.error(`Error geocoding ${store.name}:`, error);
-        // Still assign a fallback position
-        store.position = [-98.5795, 39.8283]; // Center of the US
+        // Still assign a fallback position based on country
+        const countryFallbacks: Record<string, [number, number]> = {
+          "USA": [-98.5795, 39.8283],
+          "Canada": [-106.3468, 56.1304],
+          "United Kingdom": [-1.1743, 52.3555],
+          "Japan": [138.2529, 36.2048],
+          "Australia": [133.7751, -25.2744]
+        };
+        store.position = countryFallbacks[store.country] || [0, 20];
       }
     }
   });
@@ -162,15 +193,19 @@ async function addGeocodeDataToStores() {
   loadStoreMarkers();
 }
 
-// Filter stores based on search input and state filter
+// Filter stores based on search input and region filter
 function filterStores(): ComicStore[] {
   const searchTerm = searchInput.value.toLowerCase();
-  const selectedState = stateFilter.value;
+  const selectedRegion = stateFilter.value;
   
   return comicStores.filter(store => {
-    const matchesSearch = store.name.toLowerCase().includes(searchTerm);
-    const matchesState = !selectedState || store.state === selectedState;
-    return matchesSearch && matchesState;
+    const matchesSearch = store.name.toLowerCase().includes(searchTerm) ||
+      store.city?.toLowerCase().includes(searchTerm) ||
+      store.country.toLowerCase().includes(searchTerm);
+    const matchesRegion = !selectedRegion || 
+      store.state === selectedRegion || 
+      store.country === selectedRegion;
+    return matchesSearch && matchesRegion;
   });
 }
 
@@ -199,13 +234,14 @@ function loadStoreMarkers() {
       }
       
       // Create the popup - closeButton: false removes the 'x' from hover popups
+      const locationParts = [store.city, store.state, store.country].filter(Boolean);
       const popup = new mapboxgl.Popup({ 
         offset: 25,
         closeButton: false,
         closeOnClick: false
       }).setHTML(`
         <h3>${store.name}</h3>
-        ${store.city ? `<p>${store.city}, ${store.state}</p>` : ''}
+        ${locationParts.length > 0 ? `<p>${locationParts.join(', ')}</p>` : ''}
         ${store.description ? `<p class="store-description">${store.description}</p>` : ''}
       `);
       
@@ -294,11 +330,15 @@ function loadStoreMarkers() {
 function showStoreDetails(store: ComicStore) {
   storeNameElement.textContent = store.name;
   
-  if (store.address && store.city) {
-    storeAddressElement.textContent = `${store.address}, ${store.city}, ${store.state}`;
-    storeAddressElement.style.display = 'block';
-  } else if (store.city) {
-    storeAddressElement.textContent = `${store.city}, ${store.state}`;
+  // Build location string with available parts
+  const locationParts: string[] = [];
+  if (store.address) locationParts.push(store.address);
+  if (store.city) locationParts.push(store.city);
+  if (store.state) locationParts.push(store.state);
+  locationParts.push(store.country);
+  
+  if (locationParts.length > 0) {
+    storeAddressElement.textContent = locationParts.join(', ');
     storeAddressElement.style.display = 'block';
   } else {
     storeAddressElement.style.display = 'none';
@@ -307,17 +347,18 @@ function showStoreDetails(store: ComicStore) {
   // Add Google Maps link
   const mapsLinkElement = document.getElementById('store-maps') as HTMLAnchorElement;
   if (mapsLinkElement) {
-    // Only show Google Maps link if we have a state at minimum
-    if (store.state) {
-      const address = store.address ? `${store.address}, ` : '';
-      const city = store.city ? `${store.city}, ` : '';
-      const query = encodeURIComponent(`${address}${city}${store.state} ${store.name}`);
-      mapsLinkElement.href = `https://www.google.com/maps/search/?api=1&query=${query}`;
-      mapsLinkElement.textContent = 'View on Google Maps';
-      mapsLinkElement.parentElement!.style.display = 'block';
-    } else {
-      mapsLinkElement.parentElement!.style.display = 'none';
-    }
+    // Build query from available location parts
+    const queryParts: string[] = [];
+    if (store.address) queryParts.push(store.address);
+    if (store.city) queryParts.push(store.city);
+    if (store.state) queryParts.push(store.state);
+    queryParts.push(store.country);
+    queryParts.push(store.name);
+    
+    const query = encodeURIComponent(queryParts.join(' '));
+    mapsLinkElement.href = `https://www.google.com/maps/search/?api=1&query=${query}`;
+    mapsLinkElement.textContent = 'View on Google Maps';
+    mapsLinkElement.parentElement!.style.display = 'block';
   }
   
   // Show store description in details panel if available
